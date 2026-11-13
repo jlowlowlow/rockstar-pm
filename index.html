@@ -165,9 +165,9 @@ function render(){
  $('liveStatus').textContent='Live connection · '+Object.keys(members).length+' player(s) in room';
  $('marketSummary').innerHTML='<table><tr><th>Asset</th><th>Payoff / unit</th><th>Price / unit</th></tr>'+ASSETS.map((a,j)=>`<tr><td>${a}</td><td>${money(pay[j])}</td><td>${money(price[j])}</td></tr>`).join('')+'</table><div class="note">Prices have a $30 minimum.</div>';
  if(me){
-  $('myPortfolio').innerHTML=`<label>Your name</label><input id="myName" maxlength="28" value="${esc(me.name)}"><label style="margin-top:9px">Cash balance ($)</label><input id="myCash" type="number" value="${num(me.cash)}">
-  <h3>Current holdings (units)</h3><div class="grid">${ASSETS.map((a,j)=>`<div><label>${a}</label><input id="myH${j}" type="number" value="${num(me.h?.[j])}"></div>`).join('')}</div>
-  <h3>Transactions (units): buy positive, sell negative</h3><div class="grid">${ASSETS.map((a,j)=>`<div><label>${a}</label><input id="myT${j}" type="number" value="${num(me.t?.[j])}"></div>`).join('')}</div>
+  $('myPortfolio').innerHTML=`<label>Your name</label><input id="myName" maxlength="28" value="${esc(me.name)}"><label class="asset-cash" style="margin-top:9px">Cash balance ($)</label><input id="myCash" type="number" value="${num(me.cash)}">
+  <h3>Current holdings (units)</h3><div class="grid">${ASSETS.map((a,j)=>`<div><label class="asset-${a.toLowerCase()}">${a}</label><input id="myH${j}" type="number" value="${num(me.h?.[j])}"></div>`).join('')}</div>
+  <h3>Transactions (units): buy positive, sell negative</h3><div class="grid">${ASSETS.map((a,j)=>`<div><label class="asset-${a.toLowerCase()}">${a}</label><input id="myT${j}" type="number" value="${num(me.t?.[j])}"></div>`).join('')}</div>
   <h3>Action-card adjustments</h3><label>Cash adjustment ($)</label><input id="myAC" type="number" value="${num(me.ac)}">
   <div class="grid" style="margin-top:8px">${ASSETS.map((a,j)=>`<div><label>${a} units</label><input id="myA${j}" type="number" value="${num(me.a?.[j])}"></div>`).join('')}</div>
   <div class="grid" style="margin-top:12px"><div class="metric"><small>Payoff this round</small><strong class="good">${money((me.h||[]).reduce((s,h,j)=>s+h*pay[j],0))}</strong></div><div class="metric"><small>Brokerage fees</small><strong class="bad">${money((me.t||[]).filter(x=>x!==0).length*10)}</strong></div><div class="metric"><small>Projected net worth</small><strong>${money(projections().find(p=>p.id===uid)?.net)}</strong></div></div>`;
