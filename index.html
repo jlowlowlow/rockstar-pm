@@ -185,7 +185,7 @@ function render(){
  if(!roomData)return;
  const {scenario,pay,price}=market(),m=roomData.market||{},members=roomData.members||{},me=members[uid];
  $('roomLabel').textContent=roomCode;$('roleLabel').textContent=isHost?'You are the game creator.':'You are '+(me?.name||'a player')+'.';
- $('roundNo').textContent=m.round||1;$('scenarioBadge').textContent=scenario;
+ $('roundNo').textContent=m.round||1; $('scenarioBadge').textContent=scenario; $('scenarioBadge').className='pill economy-'+scenario.toLowerCase();
  $('liveStatus').textContent='Live connection · '+Object.keys(members).length+' player(s) in room';
  $('marketSummary').innerHTML='<table><tr><th>Asset</th><th>Payoff / unit</th><th>Price / unit</th></tr>'+ASSETS.map((a,j)=>`<tr><td class="asset-${a.toLowerCase()}">${a}</td><td class="asset-${a.toLowerCase()}">${money(pay[j])}</td><td class="asset-${a.toLowerCase()}">${money(price[j])}</td></tr>`).join('')+'</table><div class="note">Prices have a $30 minimum.</div>';
  if(me){
