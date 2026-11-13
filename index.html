@@ -79,11 +79,13 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px 5px;b
 <script>
 // INSERT YOUR FIREBASE WEB APP CONFIG HERE. See SETUP.txt.
 const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://PASTE_DATABASE_NAME-default-rtdb.firebaseio.com",
-  projectId: "PASTE_PROJECT_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyDY6XJBgYsVTKuREQt37VlOhQ7kdV8wu0U",
+  authDomain: "rockstar-pm.firebaseapp.com",
+  databaseURL: "https://rockstar-pm-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "rockstar-pm",
+  storageBucket: "rockstar-pm.firebasestorage.app",
+  messagingSenderId: "89623749083",
+  appId: "1:89623749083:web:a2402972c39b3042f407fe"
 };
 const ASSETS=['Stocks','Bonds','Gold'];
 const DEFAULT_SCENARIOS={
@@ -95,7 +97,11 @@ let auth,db,uid,roomRef,roomCode,roomData,unsubscribe=null,isHost=false;
 const $=id=>document.getElementById(id),num=v=>Number.isFinite(Number(v))?Number(v):0;
 const money=n=>'$'+Number(n||0).toLocaleString('en-SG',{maximumFractionDigits:2});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function configReady(){return firebaseConfig.apiKey!=='PASTE_API_KEY'&&firebaseConfig.databaseURL.includes('firebaseio.com')&&!firebaseConfig.projectId.includes('PASTE')}
+function configReady(){
+  return firebaseConfig.apiKey !== 'PASTE_API_KEY'
+    && firebaseConfig.databaseURL.startsWith('https://')
+    && !firebaseConfig.projectId.includes('PASTE');
+}
 function setError(id,msg){$(id).textContent=msg||''}
 function market(){
  const m=roomData.market||{},base=(roomData.scenarios||DEFAULT_SCENARIOS)[m.scenario||'Boom']||DEFAULT_SCENARIOS.Boom,mods=m.mods||{p:[0,0,0],v:[0,0,0]};
