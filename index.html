@@ -97,10 +97,16 @@ let auth,db,uid,roomRef,roomCode,roomData,unsubscribe=null,isHost=false;
 const $=id=>document.getElementById(id),num=v=>Number.isFinite(Number(v))?Number(v):0;
 const money=n=>'$'+Number(n||0).toLocaleString('en-SG',{maximumFractionDigits:2});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function configReady(){
-  return firebaseConfig.apiKey !== 'PASTE_API_KEY'
-    && firebaseConfig.databaseURL.startsWith('https://')
-    && !firebaseConfig.projectId.includes('PASTE');
+function configReady() {
+  return Boolean(
+    firebaseConfig.apiKey &&
+    firebaseConfig.apiKey !== 'PASTE_API_KEY' &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.databaseURL &&
+    firebaseConfig.databaseURL.startsWith('https://') &&
+    firebaseConfig.projectId &&
+    !firebaseConfig.projectId.includes('PASTE')
+  );
 }
 function setError(id,msg){$(id).textContent=msg||''}
 function market(){
