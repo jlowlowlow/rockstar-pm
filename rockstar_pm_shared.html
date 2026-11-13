@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827"><title>Rockstar PM — Shared Game</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#151f30;--panel2:#1c2940;--line:#2b3a52;--text:#eef3fb;--muted:#a7b4c8;--green:#52d69a;--red:#ff7c86;--blue:#86b7ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:20px 16px;background:linear-gradient(135deg,#172943,#101827);border-bottom:1px solid var(--line)}
+main{max-width:850px;margin:auto;padding:14px;display:grid;gap:13px}h1{font-size:23px;margin:0}h2{font-size:18px;margin:0 0 10px}h3{font-size:15px;margin:10px 0 7px}
+.sub,.note{color:var(--muted);font-size:12px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+label{display:block;color:var(--muted);font-size:12px;margin:0 0 5px}
+input,select,button{font:inherit}input,select{width:100%;min-width:0;background:#0d1726;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px}
+button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px 13px;cursor:pointer}
+button.primary{background:#246c56;border-color:#328b6e;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}
+.pill{font-size:11px;color:var(--blue);border:1px solid #385477;border-radius:99px;padding:3px 8px}
+.metric{background:#0d1726;border-radius:10px;padding:10px}.metric small{display:block;color:var(--muted);font-size:11px}.metric strong{font-size:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px 5px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child{text-align:left}
+.player{border:1px solid var(--line);border-radius:11px;padding:12px;margin-top:10px}.good{color:var(--green)}.bad{color:var(--red)}
+.hidden{display:none!important}.tabs{display:flex;gap:7px}.tabs button{flex:1}.tabs button.active{background:#29415f;border-color:#5277a4}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
+.status{padding:9px 11px;border-radius:9px;background:#0d1726;color:var(--muted);font-size:12px}
+@media(max-width:520px){main{padding:10px}.panel{padding:11px}.grid{gap:5px}.grid input{padding:8px 6px;font-size:14px}}
+</style>
+</head>
+<body>
+<header><main style="padding:0 16px"><div class="row"><div><h1>Rockstar PM — Shared Game</h1><div class="sub">Multiplayer portfolio tracker with live updates</div></div><span class="pill">Realtime</span></div></main></header>
+<main>
+  <section class="panel" id="connectionPanel">
+    <h2>Connect to a game</h2>
+    <p class="note">The host creates a room and shares its code. Each friend joins with the code and chooses their player name. Everyone sees the same live leaderboard.</p>
+    <div id="setupNotice" class="status">First, the game owner must add Firebase settings to this file. See SETUP.txt.</div>
+    <label style="margin-top:10px">Your display name</label><input id="displayName" maxlength="28" placeholder="e.g. Alex">
+    <div class="actions" style="margin-top:10px"><button class="primary" id="createBtn">Create new game</button></div>
+    <label style="margin-top:12px">Game room code</label><input id="roomCode" maxlength="8" placeholder="e.g. A7K9Q2">
+    <button id="joinBtn" style="width:100%;margin-top:8px">Join game</button>
+    <div id="connectError" class="bad note" style="margin-top:9px"></div>
+  </section>
+
+  <section id="gamePanel" class="hidden">
+    <div class="panel">
+      <div class="row"><div><h2>Room <span id="roomLabel"></span></h2><div class="note" id="roleLabel"></div></div><button id="copyInvite">Copy invite text</button></div>
+      <div class="status" id="liveStatus">Connecting…</div>
+      <div class="tabs" style="margin-top:12px"><button class="active" data-tab="portfolio">Portfolio</button><button data-tab="marketTab">Market</button><button data-tab="historyTab">History</button></div>
+    </div>
+
+    <section class="tab" id="portfolio">
+      <div class="panel">
+        <div class="row"><h2>Round <span id="roundNo">1</span></h2><span class="pill" id="scenarioBadge">Boom</span></div>
+        <div id="marketSummary"></div>
+      </div>
+      <div class="panel">
+        <h2>Your portfolio</h2>
+        <div id="myPortfolio"></div>
+        <p class="note">You can edit only your own portfolio. Other players' portfolios and the leaderboard are visible but read-only.</p>
+        <button class="primary" id="saveMine" style="width:100%">Save my changes</button>
+        <button id="settleMine" style="width:100%;margin-top:8px">Apply this round to my portfolio</button>
+        <div id="myError" class="bad note" style="margin-top:8px"></div>
+      </div>
+      <div class="panel"><h2>Live leaderboard</h2><div id="leaderboard"></div></div>
+    </section>
+
+    <section class="tab hidden" id="marketTab">
+      <div class="panel">
+        <h2>Market &amp; scenario</h2><div id="marketControls"></div>
+        <p class="note">Only the game creator can change the scenario, modifiers, and round. Scenario reference values are editable below. Verify them against your physical rulebook.</p>
+      </div>
+      <div class="panel"><h2>Scenario reference table</h2><div id="scenarioTables"></div></div>
+    </section>
+    <section class="tab hidden" id="historyTab"><div class="panel"><h2>Round history</h2><div id="historyList" class="note">No completed rounds.</div></div></section>
+    <button id="leaveBtn">Leave this room on this device</button>
+  </section>
+  <p class="note">Realtime data is stored in the Firebase project configured by the game owner. Share the same app URL and room code. This app is a community-made companion, not an official Rockstar PM product.</p>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script>
+// INSERT YOUR FIREBASE WEB APP CONFIG HERE. See SETUP.txt.
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://PASTE_DATABASE_NAME-default-rtdb.firebaseio.com",
+  projectId: "PASTE_PROJECT_ID",
+  appId: "PASTE_APP_ID"
+};
+const ASSETS=['Stocks','Bonds','Gold'];
+const DEFAULT_SCENARIOS={
+ Boom:{p:[40,10,0],v:[140,110,90]},Recovery:{p:[20,10,10],v:[120,100,100]},
+ Stable:{p:[10,10,10],v:[110,100,100]},Slowdown:{p:[-10,10,20],v:[90,100,110]},
+ Recession:{p:[-30,-10,40],v:[70,90,140]}
+};
+let auth,db,uid,roomRef,roomCode,roomData,unsubscribe=null,isHost=false;
+const $=id=>document.getElementById(id),num=v=>Number.isFinite(Number(v))?Number(v):0;
+const money=n=>'$'+Number(n||0).toLocaleString('en-SG',{maximumFractionDigits:2});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function configReady(){return firebaseConfig.apiKey!=='PASTE_API_KEY'&&firebaseConfig.databaseURL.includes('firebaseio.com')&&!firebaseConfig.projectId.includes('PASTE')}
+function setError(id,msg){$(id).textContent=msg||''}
+function market(){
+ const m=roomData.market||{},base=(roomData.scenarios||DEFAULT_SCENARIOS)[m.scenario||'Boom']||DEFAULT_SCENARIOS.Boom,mods=m.mods||{p:[0,0,0],v:[0,0,0]};
+ return {scenario:m.scenario||'Boom',pay:base.p.map((x,i)=>x+(mods.p?.[i]||0)),price:base.v.map((x,i)=>Math.max(30,x+(mods.v?.[i]||0)))};
+}
+function projections(){
+ const {pay,price}=market(),members=roomData.members||{};
+ return Object.entries(members).map(([id,p])=>{
+  const payoff=(p.h||[0,0,0]).reduce((s,h,j)=>s+h*pay[j],0),t=p.t||[0,0,0],a=p.a||[0,0,0];
+  const fees=t.filter(x=>x!==0).length*10,tradeCash=t.reduce((s,x,j)=>s-x*price[j],0);
+  const cash=num(p.cash)+payoff+tradeCash-fees+num(p.ac);
+  const holdings=(p.h||[0,0,0]).reduce((s,h,j)=>s+(h+t[j]+a[j])*price[j],0);
+  return {id,...p,payoff,fees,cash,net:cash+holdings};
+ }).sort((a,b)=>b.net-a.net);
+}
+function render(){
+ if(!roomData)return;
+ const {scenario,pay,price}=market(),m=roomData.market||{},members=roomData.members||{},me=members[uid];
+ $('roomLabel').textContent=roomCode;$('roleLabel').textContent=isHost?'You are the game creator.':'You are '+(me?.name||'a player')+'.';
+ $('roundNo').textContent=m.round||1;$('scenarioBadge').textContent=scenario;
+ $('liveStatus').textContent='Live connection · '+Object.keys(members).length+' player(s) in room';
+ $('marketSummary').innerHTML='<table><tr><th>Asset</th><th>Payoff / unit</th><th>Price / unit</th></tr>'+ASSETS.map((a,j)=>`<tr><td>${a}</td><td>${money(pay[j])}</td><td>${money(price[j])}</td></tr>`).join('')+'</table><div class="note">Prices have a $30 minimum.</div>';
+ if(me){
+  $('myPortfolio').innerHTML=`<label>Your name</label><input id="myName" maxlength="28" value="${esc(me.name)}"><label style="margin-top:9px">Cash balance ($)</label><input id="myCash" type="number" value="${num(me.cash)}">
+  <h3>Current holdings (units)</h3><div class="grid">${ASSETS.map((a,j)=>`<div><label>${a}</label><input id="myH${j}" type="number" value="${num(me.h?.[j])}"></div>`).join('')}</div>
+  <h3>Transactions (units): buy positive, sell negative</h3><div class="grid">${ASSETS.map((a,j)=>`<div><label>${a}</label><input id="myT${j}" type="number" value="${num(me.t?.[j])}"></div>`).join('')}</div>
+  <h3>Action-card adjustments</h3><label>Cash adjustment ($)</label><input id="myAC" type="number" value="${num(me.ac)}">
+  <div class="grid" style="margin-top:8px">${ASSETS.map((a,j)=>`<div><label>${a} units</label><input id="myA${j}" type="number" value="${num(me.a?.[j])}"></div>`).join('')}</div>
+  <div class="grid" style="margin-top:12px"><div class="metric"><small>Payoff this round</small><strong class="good">${money((me.h||[]).reduce((s,h,j)=>s+h*pay[j],0))}</strong></div><div class="metric"><small>Brokerage fees</small><strong class="bad">${money((me.t||[]).filter(x=>x!==0).length*10)}</strong></div><div class="metric"><small>Projected net worth</small><strong>${money(projections().find(p=>p.id===uid)?.net)}</strong></div></div>`;
+ }
+ $('leaderboard').innerHTML=projections().map((p,i)=>`<div class="row" style="padding:9px 0;border-bottom:1px solid var(--line)"><span>${i+1}. ${esc(p.name)} ${p.id===uid?'(you)':''}</span><strong>${money(p.net)}</strong></div>`).join('');
+ $('marketControls').innerHTML=isHost?`
+ <label>Scenario</label><select id="hostScenario">${Object.keys(roomData.scenarios||DEFAULT_SCENARIOS).map(x=>`<option ${x===scenario?'selected':''}>${x}</option>`).join('')}</select>
+ <h3>Combined modifiers</h3><table><tr><th>Asset</th><th>Payoff</th><th>Price</th></tr>${ASSETS.map((a,j)=>`<tr><td>${a}</td><td><input type="number" id="modP${j}" value="${num(m.mods?.p?.[j])}"></td><td><input type="number" id="modV${j}" value="${num(m.mods?.v?.[j])}"></td></tr>`).join('')}</table>
+ <div class="actions" style="margin-top:10px"><button id="saveMarket" class="primary">Update market for everyone</button><button id="nextRound">Advance round</button></div>`:'<div class="note">The game creator controls scenario changes and round advancement.</div>';
+ $('scenarioTables').innerHTML=Object.entries(roomData.scenarios||DEFAULT_SCENARIOS).map(([n,d])=>`<div class="player"><strong>${n}</strong><table><tr><th>Asset</th><th>Payoff</th><th>Price</th></tr>${ASSETS.map((a,j)=>`<tr><td>${a}</td><td>${money(d.p[j])}</td><td>${money(d.v[j])}</td></tr>`).join('')}</table></div>`).join('');
+ const hist=roomData.history||[];$('historyList').innerHTML=hist.length?hist.slice().reverse().map(h=>`<div class="player"><div class="row"><strong>Round ${h.round}</strong><span class="pill">${esc(h.scenario)}</span></div>${h.results.map(r=>`<div class="row"><span>${esc(r.name)}</span><strong>${money(r.net)}</strong></div>`).join('')}</div>`).join(''):'No completed rounds.';
+ if(isHost){
+  $('saveMarket').onclick=async()=>{const scenario=$('hostScenario').value,mods={p:ASSETS.map((_,j)=>num($('modP'+j).value)),v:ASSETS.map((_,j)=>num($('modV'+j).value))};await roomRef.child('market').update({scenario,mods});};
+  $('nextRound').onclick=async()=>{const next=(m.round||1)+1;await roomRef.child('market/round').set(next);};
+ }
+}
+async function connect(){
+ if(!configReady())throw Error('Firebase is not configured yet. Follow SETUP.txt, then paste your Firebase web config into this HTML file.');
+ if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+ auth=firebase.auth();db=firebase.database();
+ const cred=await auth.signInAnonymously();uid=cred.user.uid;
+}
+function makeMember(name){return {name:name||'Player',cash:1000,h:[0,0,0],t:[0,0,0],a:[0,0,0],ac:0,lastSettledRound:0}}
+async function enterRoom(code,create){
+ await connect();roomCode=code.toUpperCase();roomRef=db.ref('rooms/'+roomCode);
+ const name=$('displayName').value.trim()||'Player';
+ if(create){
+  isHost=true;
+  const data={hostUid:uid,market:{round:1,scenario:'Boom',mods:{p:[0,0,0],v:[0,0,0]}},scenarios:DEFAULT_SCENARIOS,members:{[uid]:makeMember(name)},history:[]};
+  await roomRef.set(data);
+ }else{
+  isHost=false;
+  await roomRef.child('members/'+uid).set(makeMember(name));
+ }
+ $('connectionPanel').classList.add('hidden');$('gamePanel').classList.remove('hidden');
+ if(unsubscribe)unsubscribe();
+ const ref=roomRef;const cb=ref.on('value',snap=>{roomData=snap.val();if(!roomData){setError('myError','This room no longer exists.');return}isHost=roomData.hostUid===uid;render();$('liveStatus').textContent='Connected · changes sync live';},err=>setError('myError',err.message));
+ unsubscribe=()=>ref.off('value',cb);
+}
+$('createBtn').onclick=async()=>{try{setError('connectError','');const code=Math.random().toString(36).slice(2,8).toUpperCase();await enterRoom(code,true)}catch(e){setError('connectError',e.message)}};
+$('joinBtn').onclick=async()=>{try{setError('connectError','');const code=$('roomCode').value.trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code))throw Error('Enter the six-character room code.');await enterRoom(code,false)}catch(e){setError('connectError','Could not join: '+e.message)}};
+$('saveMine').onclick=async()=>{
+ try{const h=ASSETS.map((_,j)=>num($('myH'+j).value)),t=ASSETS.map((_,j)=>num($('myT'+j).value)),a=ASSETS.map((_,j)=>num($('myA'+j).value));
+ await roomRef.child('members/'+uid).update({name:$('myName').value.trim()||'Player',cash:num($('myCash').value),h,t,a,ac:num($('myAC').value)});setError('myError','Saved. Everyone can see your updated portfolio.');
+ }catch(e){setError('myError',e.message)}
+};
+$('settleMine').onclick=async()=>{
+ try{
+  const p=roomData.members[uid],m=roomData.market||{},round=m.round||1;
+  if((p.lastSettledRound||0)>=round)throw Error('You have already applied this round. Wait for the host to advance the round.');
+  const h=ASSETS.map((_,j)=>num($('myH'+j).value)),t=ASSETS.map((_,j)=>num($('myT'+j).value)),a=ASSETS.map((_,j)=>num($('myA'+j).value)),cash=num($('myCash').value),ac=num($('myAC').value);
+  const {pay,price}=market(),payoff=h.reduce((s,x,j)=>s+x*pay[j],0),fees=t.filter(x=>x!==0).length*10;
+  const nextCash=cash+payoff-t.reduce((s,x,j)=>s+x*price[j],0)-fees+ac,nextH=h.map((x,j)=>x+t[j]+a[j]);
+  if(nextCash<0)throw Error('Insufficient cash after payoff, transactions and fees.');
+  if(nextH.some(x=>x<0||x>40))throw Error('Holdings must remain between 0 and 40 units.');
+  await roomRef.child('members/'+uid).update({name:$('myName').value.trim()||'Player',cash:nextCash,h:nextH,t:[0,0,0],a:[0,0,0],ac:0,lastSettledRound:round});
+  setError('myError','Round applied to your portfolio.');
+ }catch(e){setError('myError',e.message)}
+};
+$('copyInvite').onclick=async()=>{const txt=`Join my Rockstar PM game! Room code: ${roomCode}`;try{await navigator.clipboard.writeText(txt);$('copyInvite').textContent='Copied!'}catch(e){prompt('Copy this invite text:',txt)}};
+$('leaveBtn').onclick=()=>{if(unsubscribe)unsubscribe();roomData=null;roomRef=null;$('gamePanel').classList.add('hidden');$('connectionPanel').classList.remove('hidden')};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.tab))});
+</script>
+</body></html>
