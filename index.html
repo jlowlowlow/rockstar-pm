@@ -4,7 +4,33 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827"><title>Rockstar PM — Shared Game</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1220;--panel:#151f30;--panel2:#1c2940;--line:#2b3a52;--text:#eef3fb;--muted:#a7b4c8;--green:#52d69a;--red:#ff7c86;--blue:#86b7ff}
+:root {
+  color-scheme: dark;
+
+  --bg: #0b1220;
+  --panel: #151f30;
+  --panel2: #1c2940;
+  --line: #2b3a52;
+  --text: #eef3fb;
+  --muted: #a7b4c8;
+
+  /* Asset colours */
+  --stocks: #ff626b;
+  --bonds: #65a9ff;
+  --gold: #f5c542;
+  --cash: #52d69a;
+
+  /* Economy colours */
+  --boom: #35c985;
+  --recovery: #27b9b0;
+  --stable: #8995a7;
+  --slowdown: #e6a23c;
+  --recession: #bd5265;
+
+  --green: var(--cash);
+  --red: var(--stocks);
+  --blue: var(--bonds);
+}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 header{padding:20px 16px;background:linear-gradient(135deg,#172943,#101827);border-bottom:1px solid var(--line)}
 main{max-width:850px;margin:auto;padding:14px;display:grid;gap:13px}h1{font-size:23px;margin:0}h2{font-size:18px;margin:0 0 10px}h3{font-size:15px;margin:10px 0 7px}
