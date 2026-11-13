@@ -163,7 +163,7 @@ function render(){
  $('roomLabel').textContent=roomCode;$('roleLabel').textContent=isHost?'You are the game creator.':'You are '+(me?.name||'a player')+'.';
  $('roundNo').textContent=m.round||1;$('scenarioBadge').textContent=scenario;
  $('liveStatus').textContent='Live connection · '+Object.keys(members).length+' player(s) in room';
- $('marketSummary').innerHTML='<table><tr><th>Asset</th><th>Payoff / unit</th><th>Price / unit</th></tr>'+ASSETS.map((a,j)=>`<tr><td>${a}</td><td>${money(pay[j])}</td><td>${money(price[j])}</td></tr>`).join('')+'</table><div class="note">Prices have a $30 minimum.</div>';
+ $('marketSummary').innerHTML='<table><tr><th>Asset</th><th>Payoff / unit</th><th>Price / unit</th></tr>'+ASSETS.map((a,j)=>`<tr><td class="asset-${a.toLowerCase()}">${a}</td><td class="asset-${a.toLowerCase()}">${money(pay[j])}</td><td class="asset-${a.toLowerCase()}">${money(price[j])}</td></tr>`).join('')+'</table><div class="note">Prices have a $30 minimum.</div>';
  if(me){
   $('myPortfolio').innerHTML=`<label>Your name</label><input id="myName" maxlength="28" value="${esc(me.name)}"><label class="asset-cash" style="margin-top:9px">Cash balance ($)</label><input id="myCash" type="number" value="${num(me.cash)}">
   <h3>Current holdings (units)</h3><div class="grid">${ASSETS.map((a,j)=>`<div><label class="asset-${a.toLowerCase()}">${a}</label><input id="myH${j}" type="number" value="${num(me.h?.[j])}"></div>`).join('')}</div>
