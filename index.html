@@ -776,6 +776,7 @@ function makeMember(name){
   };
 }
 
+
 async function enterRoom(code,create){
   await connect();
 
@@ -800,11 +801,33 @@ async function enterRoom(code,create){
     };
 
     await roomRef.set(data);
-    
+
   }else{
     isHost=false;
 
-    await roomRef.child('members/'+uid).set(makeMember(name));
+    // Check whether the room exists.
+    const roomSnapshot=await roomRef.once('value');
+
+    if(!roomSnapshot.exists()){
+      throw Error('Room not found. Check the room code.');
+    }
+
+    const room=roomSnapshot.val();
+    const members=room.members||{};
+
+    // Preserve an existing player's portfolio if they rejoin.
+    if(!members[uid]){
+
+      // Enforce the five-player limit.
+      if(Object.keys(members).length>=5){
+        throw Error('This room is full. A maximum of 5 players is allowed.');
+      }
+
+      await roomRef.child('members/'+uid).set(makeMember(name));
+
+    }else{
+      await roomRef.child('members/'+uid+'/name').set(name);
+    }
   }
 
   $('connectionPanel').classList.add('hidden');
