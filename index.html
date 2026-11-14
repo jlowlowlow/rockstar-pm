@@ -799,15 +799,8 @@ async function enterRoom(code,create){
       history:[]
     };
 
-    const result=await roomRef.transaction(current=>{
-      if(current===null)return data;
-      return;
-    });
-
-    if(!result.committed){
-      throw Error('That room code already exists. Please try creating another game.');
-    }
-
+    await roomRef.set(data);
+    
   }else{
     isHost=false;
 
